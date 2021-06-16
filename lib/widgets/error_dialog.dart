@@ -23,7 +23,7 @@ class ErrorDialog extends StatelessWidget {
       content: Text(content),
       actions: [CupertinoDialogAction(
         onPressed: () => Navigator.of(context).pop(),
-          child: const Text("Ok"))],
+          child: const Text("O"))],
     );
   }
 
@@ -34,7 +34,7 @@ class ErrorDialog extends StatelessWidget {
       content: Text(content),
       actions: [FlatButton(
           onPressed: () => Navigator.of(context).pop(),
-          child: const Text("Ok"))],
+          child: const Text("OK"))],
     );
   }
 }
