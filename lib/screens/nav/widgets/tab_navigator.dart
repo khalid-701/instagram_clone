@@ -1,18 +1,24 @@
-
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:instagram_clone/blocs/blocs.dart';
 import 'package:instagram_clone/config/custom_router.dart';
 import 'package:instagram_clone/enums/bottom_nav_item.dart';
+import 'package:instagram_clone/repositories/repositories.dart';
 import 'package:instagram_clone/screens/create/create_screen.dart';
 import 'package:instagram_clone/screens/feed/feed_screen.dart';
 import 'package:instagram_clone/screens/notification/notification_screen.dart';
+import 'package:instagram_clone/screens/profile/bloc/profile_bloc.dart';
 import 'package:instagram_clone/screens/profile/profile_screen.dart';
 import 'package:instagram_clone/screens/search/search_screen.dart';
 
 class TabNavigator extends StatelessWidget {
-  static const String tabNavigatorRoot= '/';
+  static const String tabNavigatorRoot = '/';
   final GlobalKey<NavigatorState> navigatorKey;
   final BottomNavItem item;
-  const TabNavigator({Key key, @required this.navigatorKey, @required this.item}) : super(key: key);
+
+  const TabNavigator(
+      {Key key, @required this.navigatorKey, @required this.item})
+      : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -20,7 +26,7 @@ class TabNavigator extends StatelessWidget {
     return Navigator(
       key: navigatorKey,
       initialRoute: tabNavigatorRoot,
-      onGenerateInitialRoutes: (_, initialRoute){
+      onGenerateInitialRoutes: (_, initialRoute) {
         return [
 
           MaterialPageRoute(
@@ -32,11 +38,12 @@ class TabNavigator extends StatelessWidget {
     );
   }
 
-  Map<String, WidgetBuilder> _routeBuilders(){
+  Map<String, WidgetBuilder> _routeBuilders() {
     return {tabNavigatorRoot: (context) => _getScreen(context, item)};
   }
-  Widget _getScreen(BuildContext context, BottomNavItem item){
-    switch (item){
+
+  Widget _getScreen(BuildContext context, BottomNavItem item) {
+    switch (item) {
       case BottomNavItem.feed:
         return FeedScreen();
       case BottomNavItem.search:
@@ -46,7 +53,12 @@ class TabNavigator extends StatelessWidget {
       case BottomNavItem.notifications:
         return NotificationScreen();
       case BottomNavItem.profile:
-        return ProfileScreen();
+        return BlocProvider<ProfileBloc>(
+          create: (_) => ProfileBloc(userRepository: context.read<UserRepository>(),
+          authBloc: context.read<AuthBloc>(),
+          )..add(ProfileLoadUser(userId: context.read<AuthBloc>().state.user.uid)),
+          child: ProfileScreen(),
+        );
       default:
         return Scaffold();
     }

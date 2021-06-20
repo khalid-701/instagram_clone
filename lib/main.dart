@@ -9,6 +9,7 @@ import 'package:instagram_clone/repositories/auth/auth_repository.dart';
 import 'package:instagram_clone/screens/screens.dart';
 
 import 'config/custom_router.dart';
+import 'repositories/user/user_repository.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -25,7 +26,9 @@ class MyApp extends StatelessWidget {
    // AuthRepository().logOut();
     return MultiRepositoryProvider(
       providers: [
-        RepositoryProvider<AuthRepository>(create: (_) => AuthRepository())
+        RepositoryProvider<AuthRepository>(create: (_) => AuthRepository()),
+
+        RepositoryProvider<UserRepository>(create: (_) => UserRepository())
       ],
       child: MultiBlocProvider(
         providers: [
