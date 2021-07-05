@@ -4,7 +4,7 @@ import 'package:instagram_clone/blocs/blocs.dart';
 import 'package:instagram_clone/config/custom_router.dart';
 import 'package:instagram_clone/enums/bottom_nav_item.dart';
 import 'package:instagram_clone/repositories/repositories.dart';
-import 'package:instagram_clone/screens/create/create_screen.dart';
+import 'package:instagram_clone/screens/create_post/create_screen.dart';
 import 'package:instagram_clone/screens/feed/feed_screen.dart';
 import 'package:instagram_clone/screens/notification/notification_screen.dart';
 import 'package:instagram_clone/screens/profile/bloc/profile_bloc.dart';
