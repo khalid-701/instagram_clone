@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:instagram_clone/screens/edit_profile/edit_profile_screen.dart';
 
 class ProfileButton extends StatelessWidget {
   final bool isCurrentUser;
@@ -14,7 +15,9 @@ class ProfileButton extends StatelessWidget {
         ? FlatButton(
             textColor: Colors.white,
             color: Theme.of(context).primaryColor,
-            onPressed: () {},
+            onPressed: () => Navigator.of(context).pushNamed(
+                EditProfileScreen.routeName,
+                arguments: EditProfileScreenArgs(context: context)),
             child: const Text(
               "Edit Profile",
               style: TextStyle(fontSize: 16),

@@ -9,6 +9,7 @@ import 'package:instagram_clone/repositories/auth/auth_repository.dart';
 import 'package:instagram_clone/screens/screens.dart';
 
 import 'config/custom_router.dart';
+import 'repositories/post/post_repository.dart';
 import 'repositories/storage/storage_repository.dart';
 import 'repositories/user/user_repository.dart';
 
@@ -31,6 +32,7 @@ class MyApp extends StatelessWidget {
 
         RepositoryProvider<UserRepository>(create: (_) => UserRepository()),
         RepositoryProvider<StorageRepository>(create: (_) => StorageRepository()),
+        RepositoryProvider<PostRepository>(create: (_) => PostRepository()),
       ],
       child: MultiBlocProvider(
         providers: [

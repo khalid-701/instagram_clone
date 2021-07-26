@@ -5,6 +5,7 @@ import 'package:instagram_clone/config/custom_router.dart';
 import 'package:instagram_clone/enums/bottom_nav_item.dart';
 import 'package:instagram_clone/repositories/repositories.dart';
 import 'package:instagram_clone/screens/create_post/create_screen.dart';
+import 'package:instagram_clone/screens/create_post/cubit/create_post_cubit.dart';
 import 'package:instagram_clone/screens/feed/feed_screen.dart';
 import 'package:instagram_clone/screens/notification/notification_screen.dart';
 import 'package:instagram_clone/screens/profile/bloc/profile_bloc.dart';
@@ -28,10 +29,10 @@ class TabNavigator extends StatelessWidget {
       initialRoute: tabNavigatorRoot,
       onGenerateInitialRoutes: (_, initialRoute) {
         return [
-
           MaterialPageRoute(
             settings: RouteSettings(name: tabNavigatorRoot),
-            builder: (context) => routeBuilders[initialRoute](context),)
+            builder: (context) => routeBuilders[initialRoute](context),
+          )
         ];
       },
       onGenerateRoute: CustomRouter.onGenerateNestedRoute,
@@ -49,14 +50,23 @@ class TabNavigator extends StatelessWidget {
       case BottomNavItem.search:
         return SearchScreen();
       case BottomNavItem.create:
-        return CreateScreen();
+        return BlocProvider<CreatePostCubit>(
+          create: (context) => CreatePostCubit(
+              postRepository: context.read<PostRepository>(),
+              storageRepository: context.read<StorageRepository>(),
+              authBloc:context.read<AuthBloc>()),
+          child: CreatePostScreen(),
+        );
       case BottomNavItem.notifications:
         return NotificationScreen();
       case BottomNavItem.profile:
         return BlocProvider<ProfileBloc>(
-          create: (_) => ProfileBloc(userRepository: context.read<UserRepository>(),
-          authBloc: context.read<AuthBloc>(),
-          )..add(ProfileLoadUser(userId: context.read<AuthBloc>().state.user.uid)),
+          create: (_) => ProfileBloc(
+            userRepository: context.read<UserRepository>(),
+            postRepository: context.read<PostRepository>(),
+            authBloc: context.read<AuthBloc>(),
+          )..add(
+              ProfileLoadUser(userId: context.read<AuthBloc>().state.user.uid)),
           child: ProfileScreen(),
         );
       default:

@@ -11,11 +11,12 @@ class StorageRepository extends BaseStorageRepository {
   StorageRepository({FirebaseStorage firebaseStorage})
       : _firebaseStorage = firebaseStorage ?? FirebaseStorage.instance;
 
-  _uploadImage({@required File image, @required String ref}) async {
+  Future<String> _uploadImage(
+      {@required File image, @required String ref}) async {
     final downloadUrl = await _firebaseStorage
         .ref(ref)
         .putFile(image)
-        .then((taskSnapshot) => taskSnapshot..ref.getDownloadURL());
+        .then((taskSnapshot) => taskSnapshot.ref.getDownloadURL());
     return downloadUrl;
   }
 
@@ -25,13 +26,13 @@ class StorageRepository extends BaseStorageRepository {
     var imageId = Uuid().v4();
 
     //update user profile image
-    if (url.isNotEmpty){
+    if (url.isNotEmpty) {
       final exp = RegExp(r'userProfile_(.*).jpg');
       imageId = exp.firstMatch(url)[1];
     }
 
-    final downloadUrl =
-        await _uploadImage(image: image, ref: 'images/users/userProfile_$imageId.jpg');
+    final downloadUrl = await _uploadImage(
+        image: image, ref: 'images/users/userProfile_$imageId.jpg');
 
     return downloadUrl;
   }
