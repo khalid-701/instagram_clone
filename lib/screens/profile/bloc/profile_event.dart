@@ -36,3 +36,8 @@ class ProfileUpdatePosts extends ProfileEvent{
   // TODO: implement props
   List<Object> get props => [posts];
 }
+
+//implement follower and following
+class ProfileFollowUser extends ProfileEvent{}
+
+class ProfileUnfollowUser extends ProfileEvent{}
