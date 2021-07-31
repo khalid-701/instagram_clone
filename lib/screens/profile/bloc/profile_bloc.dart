@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:instagram_clone/blocs/blocs.dart';
+import 'package:instagram_clone/cubits/cubits.dart';
 import 'package:instagram_clone/models/models.dart';
 import 'package:instagram_clone/repositories/repositories.dart';
 import 'package:meta/meta.dart';
@@ -15,15 +16,19 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
   final UserRepository _userRepository;
   final AuthBloc _authBloc;
   final PostRepository _postRepository;
+  final LikedPostsCubit _likedPostsCubit;
   StreamSubscription<List<Future<Post>>> _postsSubscription;
 
-  ProfileBloc(
-      {@required UserRepository userRepository, @required AuthBloc authBloc, @required PostRepository postRepository})
-      : _userRepository = userRepository,
+  ProfileBloc({
+    @required UserRepository userRepository,
+    @required AuthBloc authBloc,
+    @required PostRepository postRepository,
+    @required LikedPostsCubit likedPostsCubit,
+  })  : _userRepository = userRepository,
         _postRepository = postRepository,
         _authBloc = authBloc,
+        _likedPostsCubit = likedPostsCubit,
         super(ProfileState.initial());
-
 
   //karena ada StreamSubscription harus ada closenya
   @override
@@ -33,7 +38,9 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
   }
 
   @override
-  Stream<ProfileState> mapEventToState(ProfileEvent event,) async* {
+  Stream<ProfileState> mapEventToState(
+    ProfileEvent event,
+  ) async* {
     if (event is ProfileLoadUser) {
       yield* _mapProfileLoadUserState(event);
     } else if (event is ProfileToggleGridView) {
@@ -43,9 +50,9 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
     }
     //implement follower and following
     else if (event is ProfileFollowUser) {
-      yield* _mapProfileFollowUserToState()
+      yield* _mapProfileFollowUserToState();
     } else if (event is ProfileUnfollowUser) {
-      yield* _mapProfileUnfollowUserToState()
+      yield* _mapProfileUnfollowUserToState();
     }
   }
 
@@ -55,40 +62,44 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
       final user = await _userRepository.getUserWithId(userId: event.userId);
       final isCurrentUser = _authBloc.state.user.uid == event.userId;
 
-
       //implement follower and following
       final isFollowing = await _userRepository.isFollowing(
           userId: _authBloc.state.user.uid, otherUserId: event.userId);
       _postsSubscription?.cancel();
-      _postsSubscription =
-          _postRepository.getUserPosts(userId: event.userId).listen((
-              posts) async {
-            final allPosts = await Future.wait(posts);
-            add(ProfileUpdatePosts(posts: allPosts));
-          });
+      _postsSubscription = _postRepository
+          .getUserPosts(userId: event.userId)
+          .listen((posts) async {
+        final allPosts = await Future.wait(posts);
+        add(ProfileUpdatePosts(posts: allPosts));
+      });
       yield state.copyWith(
           user: user,
           isCurrentUser: isCurrentUser,
           isFollowing: isFollowing,
-          status: ProfileStatus.loaded
-      );
+          status: ProfileStatus.loaded);
     } catch (err) {
       yield state.copyWith(
           status: ProfileStatus.error,
-          failure: const Failure(
-              message: "We were unable to load this profile.")
-      );
+          failure:
+              const Failure(message: "We were unable to load this profile."));
     }
   }
 
   Stream<ProfileState> _mapProfileToggleGridViewToState(
-      ProfileToggleGridView event,) async* {
+    ProfileToggleGridView event,
+  ) async* {
     yield state.copyWith(isGridView: event.isGridView);
   }
 
   Stream<ProfileState> _mapProfileUpdatePostsToState(
-      ProfileUpdatePosts event,) async* {
+    ProfileUpdatePosts event,
+  ) async* {
     yield state.copyWith(posts: event.posts);
+    final likedPostIds = await _postRepository.getLikedPostIds(
+      userId: _authBloc.state.user.uid,
+      posts: event.posts,
+    );
+    _likedPostsCubit.updateLikedPosts(postIds: likedPostIds);
   }
 
 //implement follower and following
@@ -97,12 +108,12 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
       _userRepository.followUser(
           userId: _authBloc.state.user.uid, followUserId: state.user.id);
 
-      final updateUser = state.user.copyWith(
-          followers: state.user.followers + 1);
+      final updateUser =
+          state.user.copyWith(followers: state.user.followers + 1);
       yield state.copyWith(user: updateUser, isFollowing: true);
-    }
-    catch (err) {
-      yield state.copyWith(status: ProfileStatus.error,
+    } catch (err) {
+      yield state.copyWith(
+          status: ProfileStatus.error,
           failure: const Failure(
               message: 'Something went wrong! Please try again.'));
     }
@@ -113,15 +124,14 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
       _userRepository.unfollowUser(
           userId: _authBloc.state.user.uid, unfollowUserId: state.user.id);
 
-      final updateUser = state.user.copyWith(
-          followers: state.user.followers - 1);
+      final updateUser =
+          state.user.copyWith(followers: state.user.followers - 1);
       yield state.copyWith(user: updateUser, isFollowing: false);
-    }
-    catch (err) {
-      yield state.copyWith(status: ProfileStatus.error,
+    } catch (err) {
+      yield state.copyWith(
+          status: ProfileStatus.error,
           failure: const Failure(
               message: 'Something went wrong! Please try again.'));
     }
   }
-
 }

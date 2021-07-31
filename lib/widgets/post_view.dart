@@ -9,11 +9,15 @@ import 'user_profile_image.dart';
 class PostView extends StatelessWidget {
   final Post post;
   final bool isLiked;
+  final VoidCallback onLike;
+  final bool recentlyLiked;
 
   const PostView({
     Key key,
     @required this.post,
     @required this.isLiked,
+    @required this.onLike,
+    this.recentlyLiked = false,
   }) : super(key: key);
 
   @override
@@ -47,7 +51,7 @@ class PostView extends StatelessWidget {
           ),
         ),
         GestureDetector(
-          onDoubleTap: () {},
+          onDoubleTap: onLike,
           child: CachedNetworkImage(
             imageUrl: post.imageUrl,
             fit: BoxFit.cover,
@@ -66,7 +70,7 @@ class PostView extends StatelessWidget {
                     )
                   : const Icon(Icons.favorite_border_outlined),
             ),
-            IconButton(onPressed: () {}, icon: Icon(Icons.comment))
+            IconButton(onPressed: onLike, icon: Icon(Icons.comment))
           ],
         ),
         Padding(
@@ -75,7 +79,7 @@ class PostView extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               Text(
-                '${post.likes} likes',
+                '${recentlyLiked? post.likes + 1 : post.likes} likes',
                 style: const TextStyle(fontWeight: FontWeight.w600),
               ),
               const SizedBox(
