@@ -3,7 +3,7 @@ import 'package:instagram_clone/models/models.dart';
 abstract class BasePostRepository {
   Future<void> createPost({Post post});
 
-  Future<void> createComment({Comment comment});
+  Future<void> createComment({Post post, Comment comment});
 
   void createLike({Post post, String userId});
 

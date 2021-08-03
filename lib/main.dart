@@ -11,6 +11,7 @@ import 'package:instagram_clone/screens/screens.dart';
 
 import 'config/custom_router.dart';
 import 'repositories/post/post_repository.dart';
+import 'repositories/repositories.dart';
 import 'repositories/storage/storage_repository.dart';
 import 'repositories/user/user_repository.dart';
 
@@ -31,9 +32,9 @@ class MyApp extends StatelessWidget {
       providers: [
         RepositoryProvider<AuthRepository>(create: (_) => AuthRepository()),
         RepositoryProvider<UserRepository>(create: (_) => UserRepository()),
-        RepositoryProvider<StorageRepository>(
-            create: (_) => StorageRepository()),
+        RepositoryProvider<StorageRepository>(create: (_) => StorageRepository()),
         RepositoryProvider<PostRepository>(create: (_) => PostRepository()),
+        RepositoryProvider<NotificationRepository>(create: (_) => NotificationRepository()),
       ],
       child: MultiBlocProvider(
         providers: [
@@ -42,10 +43,12 @@ class MyApp extends StatelessWidget {
               authRepository: context.read<AuthRepository>(),
             ),
           ),
-          BlocProvider<LikedPostsCubit>( create: (context) => LikedPostsCubit(
-            postRepository: context.read<PostRepository>(),
-            authBloc: context.read<AuthBloc>(),
-          ),)
+          BlocProvider<LikedPostsCubit>(
+            create: (context) => LikedPostsCubit(
+              postRepository: context.read<PostRepository>(),
+              authBloc: context.read<AuthBloc>(),
+            ),
+          )
         ],
         child: MaterialApp(
           debugShowCheckedModeBanner: false,

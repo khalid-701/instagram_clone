@@ -1,11 +1,12 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:instagram_clone/config/paths.dart';
+import 'package:instagram_clone/enums/enums.dart';
+import 'package:instagram_clone/models/models.dart';
 import 'package:instagram_clone/models/user_model.dart';
 import 'package:instagram_clone/repositories/repositories.dart';
 import 'package:meta/meta.dart';
 
 class UserRepository extends BaseUserRepository {
-  //membuat dependensi di firebase data store
   final FirebaseFirestore _firebaseFirestore;
 
   UserRepository({FirebaseFirestore firebaseFirestore})
@@ -13,9 +14,8 @@ class UserRepository extends BaseUserRepository {
 
   @override
   Future<User> getUserWithId({@required String userId}) async {
-    //read document from firebase and store to user model
     final doc =
-        await _firebaseFirestore.collection(Paths.users).doc(userId).get();
+    await _firebaseFirestore.collection(Paths.users).doc(userId).get();
     return doc.exists ? User.fromDocument(doc) : User.empty;
   }
 
@@ -33,55 +33,69 @@ class UserRepository extends BaseUserRepository {
         .collection(Paths.users)
         .where('username', isGreaterThanOrEqualTo: query)
         .get();
-
     return userSnap.docs.map((doc) => User.fromDocument(doc)).toList();
   }
 
-  //implement follower and following
-
   @override
-  void unfollowUser(
-      {@required String userId, @required String unfollowUserId}) {
-    // Remove unfollowUser from users userFollowing
-    _firebaseFirestore
-        .collection(Paths.following)
-        .doc(userId)
-        .collection(Paths.userFollowing)
-        .doc(unfollowUserId)
-        .set({});
-
-    // Remove user from unfollowUser
-    _firebaseFirestore
-        .collection(Paths.followers)
-        .doc(unfollowUserId)
-        .collection(Paths.userFollowers)
-        .doc(userId)
-        .set({});
-  }
-
-  @override
-  void followUser({@required String userId, @required String followUserId}) {
-    // Add followUser to usersFollowing
+  void followUser({
+    @required String userId,
+    @required String followUserId,
+  }) {
+    // Add followUser to user's userFollowing.
     _firebaseFirestore
         .collection(Paths.following)
         .doc(userId)
         .collection(Paths.userFollowing)
         .doc(followUserId)
         .set({});
-
-    // Add user to followUsers userFollowers
+    // Add user to followUser's userFollowers.
     _firebaseFirestore
         .collection(Paths.followers)
         .doc(followUserId)
         .collection(Paths.userFollowers)
         .doc(userId)
         .set({});
+
+    final notification = Notif(
+      type: NotifType.follow,
+      fromUser: User.empty.copyWith(id: userId),
+      date: DateTime.now(),
+    );
+
+    _firebaseFirestore
+        .collection(Paths.notifications)
+        .doc(followUserId)
+        .collection(Paths.userNotifications)
+        .add(notification.toDocument());
   }
 
   @override
-  Future<bool> isFollowing(
-      {@required String userId, @required String otherUserId}) async {
-    // is otherUser in users userFollowing
+  void unfollowUser({
+    @required String userId,
+    @required String unfollowUserId,
+  }) {
+    // Remove unfollowUser from user's userFollowing.
+    _firebaseFirestore
+        .collection(Paths.following)
+        .doc(userId)
+        .collection(Paths.userFollowing)
+        .doc(unfollowUserId)
+        .delete();
+    // Remove user from unfollowUser's userFollowers.
+    _firebaseFirestore
+        .collection(Paths.followers)
+        .doc(unfollowUserId)
+        .collection(Paths.userFollowers)
+        .doc(userId)
+        .delete();
+  }
+
+  @override
+  Future<bool> isFollowing({
+    @required String userId,
+    @required String otherUserId,
+  }) async {
+    // is otherUser in user's userFollowing
     final otherUserDoc = await _firebaseFirestore
         .collection(Paths.following)
         .doc(userId)
@@ -91,3 +105,4 @@ class UserRepository extends BaseUserRepository {
     return otherUserDoc.exists;
   }
 }
+

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:instagram_clone/models/models.dart';
 import 'package:instagram_clone/screens/profile/profile_screen.dart';
 import 'package:instagram_clone/extensions/extensions.dart';
+import 'package:instagram_clone/screens/screens.dart';
 
 import 'user_profile_image.dart';
 
@@ -62,7 +63,7 @@ class PostView extends StatelessWidget {
         Row(
           children: [
             IconButton(
-              onPressed: () {},
+              onPressed: onLike,
               icon: isLiked
                   ? const Icon(
                       Icons.favorite,
@@ -70,7 +71,12 @@ class PostView extends StatelessWidget {
                     )
                   : const Icon(Icons.favorite_border_outlined),
             ),
-            IconButton(onPressed: onLike, icon: Icon(Icons.comment))
+            IconButton(
+              onPressed: () => Navigator.of(context).pushNamed(
+                  CommentsScreen.routeName,
+                  arguments: CommentsScreenArgs(post: post)),
+              icon: Icon(Icons.comment),
+            )
           ],
         ),
         Padding(
@@ -79,7 +85,7 @@ class PostView extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               Text(
-                '${recentlyLiked? post.likes + 1 : post.likes} likes',
+                '${recentlyLiked ? post.likes + 1 : post.likes} likes',
                 style: const TextStyle(fontWeight: FontWeight.w600),
               ),
               const SizedBox(

@@ -9,7 +9,8 @@ import 'package:instagram_clone/screens/create_post/create_screen.dart';
 import 'package:instagram_clone/screens/create_post/cubit/create_post_cubit.dart';
 import 'package:instagram_clone/screens/feed/bloc/feed_bloc.dart';
 import 'package:instagram_clone/screens/feed/feed_screen.dart';
-import 'package:instagram_clone/screens/notification/notification_screen.dart';
+import 'package:instagram_clone/screens/notifications/bloc/notifications_bloc.dart';
+import 'package:instagram_clone/screens/notifications/notification_screen.dart';
 import 'package:instagram_clone/screens/profile/bloc/profile_bloc.dart';
 import 'package:instagram_clone/screens/profile/profile_screen.dart';
 import 'package:instagram_clone/screens/search/cubit/search_cubit.dart';
@@ -55,8 +56,8 @@ class TabNavigator extends StatelessWidget {
             authBloc: context.read<AuthBloc>(),
             likedPostsCubit: context.read<LikedPostsCubit>(),
           )..add(FeedFetchPosts()),
-  child: FeedScreen(),
-);
+          child: FeedScreen(),
+        );
       case BottomNavItem.search:
         return BlocProvider<SearchCubit>(
           create: (context) =>
@@ -72,7 +73,13 @@ class TabNavigator extends StatelessWidget {
           child: CreatePostScreen(),
         );
       case BottomNavItem.notifications:
-        return NotificationScreen();
+        return BlocProvider<NotificationsBloc>(
+          create: (context) => NotificationsBloc(
+            notificationRepository: context.read<NotificationRepository>(),
+            authBloc: context.read<AuthBloc>(),
+          ),
+          child: NotificationScreen(),
+        );
       case BottomNavItem.profile:
         return BlocProvider<ProfileBloc>(
           create: (_) => ProfileBloc(

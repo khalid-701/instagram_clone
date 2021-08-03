@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:instagram_clone/screens/comments/comments_screen.dart';
 import 'package:instagram_clone/screens/screens.dart';
 
 class CustomRouter {
@@ -36,6 +37,10 @@ class CustomRouter {
 
       case EditProfileScreen.routeName:
         return EditProfileScreen.route(args: settings.arguments);
+
+
+      case CommentsScreen.routeName:
+        return CommentsScreen.route(args: settings.arguments);
   /*    case '/':
         return MaterialPageRoute(
           settings: const RouteSettings(name: '/'),
